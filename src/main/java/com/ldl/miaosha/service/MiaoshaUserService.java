@@ -28,7 +28,33 @@ public class MiaoshaUserService {
     RedisService redisService;
 
     public MiaoshaUser getById(Long id) {
-        return miaoshaUserDao.getById(id);
+        MiaoshaUser miaoshaUser = redisService.get(MiaoshaUserKey.getById, "" + id, MiaoshaUser.class);
+        if (miaoshaUser != null) {
+            return miaoshaUser;
+        }
+        miaoshaUser =  miaoshaUserDao.getById(id);
+        if (miaoshaUser != null) {
+            redisService.set(MiaoshaUserKey.getById, "" + id, miaoshaUser);
+        }
+
+        return miaoshaUser;
+    }
+
+    public boolean updatePassword(String token, long id, String fromPass) {
+        MiaoshaUser miaoshaUser = getById(id);
+        if (miaoshaUser == null) {
+            throw new GolbalException(CodeMsg.MOBILE_NOT_EXIST);
+        }
+        MiaoshaUser newMiaoshaUser = new MiaoshaUser();
+        newMiaoshaUser.setId(id);
+        newMiaoshaUser.setPassword(MD5Util.fromPassToDbPass(fromPass, miaoshaUser.getSalt()));
+        miaoshaUserDao.update(newMiaoshaUser);
+
+        redisService.delete(MiaoshaUserKey.getById, "" + id);
+        miaoshaUser.setPassword(newMiaoshaUser.getPassword());
+        redisService.set(MiaoshaUserKey.token, token, miaoshaUser);
+
+        return true;
     }
 
     public MiaoshaUser getByToken(HttpServletResponse httpServletResponse, String token) {
@@ -43,7 +69,7 @@ public class MiaoshaUserService {
         return miaoshaUser;
     }
 
-    public boolean login(HttpServletResponse httpServletResponse, LoginVo loginVo) {
+    public String login(HttpServletResponse httpServletResponse, LoginVo loginVo) {
         if (loginVo == null) {
             throw new GolbalException(CodeMsg.SERVER_ERROR);
         }
@@ -68,7 +94,7 @@ public class MiaoshaUserService {
         }
         String token = UUidUtil.uuid();
         addCookie(httpServletResponse, token, miaoshaUser);
-        return true;
+        return token;
     }
 
     private void addCookie(HttpServletResponse httpServletResponse, String token, MiaoshaUser miaoshaUser) {

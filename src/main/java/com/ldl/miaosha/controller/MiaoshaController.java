@@ -6,7 +6,6 @@ import com.ldl.miaosha.domain.OrderInfo;
 import com.ldl.miaosha.result.CodeMsg;
 import com.ldl.miaosha.service.GoodsService;
 import com.ldl.miaosha.service.MiaoshaService;
-import com.ldl.miaosha.service.MiaoshaUserService;
 import com.ldl.miaosha.service.OrderService;
 import com.ldl.miaosha.vo.GoodsVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +30,11 @@ public class MiaoshaController {
     @Autowired
     OrderService orderService;
 
+    /*
+     * 5000 * 10
+     * 2449 qps
+     * 目前的秒杀功能会导致秒杀商品中的库存为负数
+     */
     @RequestMapping("/do_miaosha")
     public String toLogin(Model model, MiaoshaUser miaoshaUser, @RequestParam("goodsId") long goodsId) {
         model.addAttribute("user", miaoshaUser);
