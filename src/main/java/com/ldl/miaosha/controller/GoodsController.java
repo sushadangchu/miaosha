@@ -3,7 +3,9 @@ package com.ldl.miaosha.controller;
 import com.ldl.miaosha.domain.MiaoshaUser;
 import com.ldl.miaosha.redis.GoodsKey;
 import com.ldl.miaosha.redis.RedisService;
+import com.ldl.miaosha.result.Result;
 import com.ldl.miaosha.service.GoodsService;
+import com.ldl.miaosha.vo.GoodsDetailVo;
 import com.ldl.miaosha.vo.GoodsVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +47,7 @@ public class GoodsController {
      */
     @RequestMapping(value = "/to_list", produces = "text/html")
     @ResponseBody
-    public String toLogin(HttpServletRequest request, HttpServletResponse response, Model model, MiaoshaUser miaoshaUser) {
+    public String toList(HttpServletRequest request, HttpServletResponse response, Model model, MiaoshaUser miaoshaUser) {
         model.addAttribute("user", miaoshaUser);
         String html = redisService.get(GoodsKey.GoodsList, "", String.class);
         if (!StringUtils.isEmpty(html)) {
@@ -65,9 +67,9 @@ public class GoodsController {
         return html;
     }
 
-    @RequestMapping(value = "/to_detail/{goodsId}", produces = "text/html")
+    @RequestMapping(value = "/to_detail2/{goodsId}", produces = "text/html")
     @ResponseBody
-    public String toDetail(HttpServletRequest request, HttpServletResponse response, Model model, MiaoshaUser miaoshaUser, @PathVariable("goodsId") Long goodsId) {
+    public String toDetail2(HttpServletRequest request, HttpServletResponse response, Model model, MiaoshaUser miaoshaUser, @PathVariable("goodsId") Long goodsId) {
         model.addAttribute("user", miaoshaUser);
 
         String html = redisService.get(GoodsKey.GoodsDetail, "" + goodsId, String.class);
@@ -106,5 +108,36 @@ public class GoodsController {
         }
 
         return html;
+    }
+
+    @RequestMapping(value = "/detail/{goodsId}")
+    @ResponseBody
+    public Result<GoodsDetailVo> toDetail(MiaoshaUser miaoshaUser, @PathVariable("goodsId") Long goodsId) {
+        GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
+
+        Long startAt = goods.getStartDate().getTime();
+        Long endAt = goods.getEndDate().getTime();
+        Long now = System.currentTimeMillis();
+
+        int miaoshaStatus = 0;
+        int remainSeconds = 0;
+
+        if (now < startAt) {
+            miaoshaStatus = 0;
+            remainSeconds = (int) ((startAt - now) / 1000);
+        } else if (now > endAt) {
+            miaoshaStatus = 2;
+            remainSeconds = -1;
+        } else {
+            miaoshaStatus = 1;
+        }
+
+        GoodsDetailVo goodsDetailVo = new GoodsDetailVo();
+        goodsDetailVo.setGoods(goods);
+        goodsDetailVo.setMiaoshaUser(miaoshaUser);
+        goodsDetailVo.setMiaoshaStatus(miaoshaStatus);
+        goodsDetailVo.setRemainSeconds(remainSeconds);
+
+        return Result.success(goodsDetailVo);
     }
 }

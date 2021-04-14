@@ -17,7 +17,7 @@ public class GolbalExceptionHandler {
 
     @ExceptionHandler(value=Exception.class)
     public Result<CodeMsg> exceptionHandler(HttpServletRequest httpServletRequest, Exception exception) {
-        exception.printStackTrace();
+        //exception.printStackTrace();
         if (exception instanceof BindException) {
             BindException bindException = (BindException) exception;
             List<ObjectError> allErrors = bindException.getAllErrors();

@@ -38,7 +38,6 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
             return null;
         }
         String token = StringUtils.isEmpty(parameterToken) ? cookieToken : parameterToken;
-
         MiaoshaUser miaoshaUser = miaoshaUserService.getByToken(nativeResponse, token);
         return miaoshaUser;
     }

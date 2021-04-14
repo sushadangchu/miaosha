@@ -1,14 +1,13 @@
 package com.ldl.miaosha.service;
 
-import com.ldl.miaosha.dao.GoodsDao;
 import com.ldl.miaosha.domain.MiaoshaUser;
 import com.ldl.miaosha.domain.OrderInfo;
+import com.ldl.miaosha.exception.GolbalException;
+import com.ldl.miaosha.result.CodeMsg;
 import com.ldl.miaosha.vo.GoodsVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class MiaoshaService {
@@ -21,9 +20,11 @@ public class MiaoshaService {
 
     @Transactional
     public OrderInfo miaosha(MiaoshaUser miaoshaUser, GoodsVo goodsVo) {
-        //下订单，减少库存，返回订单信息
-        OrderInfo orderInfo = orderService.createOrder(miaoshaUser, goodsVo);
-        goodsService.reduceStock(goodsVo);
-        return orderInfo;
+        //减少库存,下订单，返回订单信息
+        int row = goodsService.reduceStock(goodsVo);
+        if (row == 0) {
+            throw new GolbalException(CodeMsg.MIAO_SHA_OVER);
+        }
+        return orderService.createOrder(miaoshaUser, goodsVo);
     }
 }

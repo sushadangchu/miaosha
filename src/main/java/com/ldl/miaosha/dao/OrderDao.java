@@ -20,4 +20,7 @@ public interface OrderDao {
 
     @Select("select * from miaosha_order where user_id = ${userId} and goods_id = #{goodsId}")
     public MiaoshaOrder getMiaoshaOrderByUserIdAndGoodsId(@Param("userId") long userId, @Param("goodsId") long goodsId);
+
+    @Select("select * from order_info where id = ${orderId}")
+    public OrderInfo getOrderById( @Param("orderId") long orderId);
 }
