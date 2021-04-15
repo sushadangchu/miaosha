@@ -47,15 +47,17 @@ public class OrderService {
         return orderInfo;
     }
 
+    //如果redis没有，说明并没有秒杀成功
     public MiaoshaOrder getMiaoshaOrderByUserIdAndGoodsId(long userId, long goodsId) {
-        MiaoshaOrder miaoshaOrder = redisService.get(OrderKey.getMiaoshaOrderByUserIdGoodsId, "" + userId + "_" + goodsId, MiaoshaOrder.class);
-        if (miaoshaOrder != null) {
-            return miaoshaOrder;
-        }
-        return orderDao.getMiaoshaOrderByUserIdAndGoodsId(userId, goodsId);
+        return redisService.get(OrderKey.getMiaoshaOrderByUserIdGoodsId, "" + userId + "_" + goodsId, MiaoshaOrder.class);
     }
 
     public OrderInfo getOrderById(long orderId) {
         return orderDao.getOrderById(orderId);
+    }
+
+    public void deleteOrders() {
+        orderDao.deleteOrders();
+        orderDao.deleteMiaoshaOrders();
     }
 }

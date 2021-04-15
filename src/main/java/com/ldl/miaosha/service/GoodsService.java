@@ -29,4 +29,13 @@ public class GoodsService {
         miaoshaGoods.setGoodsId(goodsVo.getId());
         return goodsDao.reduceStock(miaoshaGoods);
     }
+
+    public void resetStock(List<GoodsVo> goodsVoList) {
+        for (GoodsVo goodsVo : goodsVoList) {
+            MiaoshaGoods miaoshaGoods = new MiaoshaGoods();
+            miaoshaGoods.setGoodsId(goodsVo.getId());
+            miaoshaGoods.setStockCount(goodsVo.getStockCount());
+            goodsDao.resetStock(miaoshaGoods);
+        }
+    }
 }
