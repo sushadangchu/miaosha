@@ -114,11 +114,11 @@ public class RedisService {
             return null;
         }
         if (clazz == int.class || clazz == Integer.class) {
-            return (T) Integer.getInteger(str);
+            return (T) Integer.valueOf(str);
         } else if (clazz == String.class) {
             return (T) str;
         } else if (clazz == long.class || clazz == Long.class) {
-            return (T) Long.getLong(str);
+            return (T) Long.valueOf(str);
         } else {
             return JSON.toJavaObject(JSON.parseObject(str), clazz);
         }

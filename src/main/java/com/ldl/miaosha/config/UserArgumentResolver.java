@@ -1,5 +1,6 @@
 package com.ldl.miaosha.config;
 
+import com.ldl.miaosha.access.UserContext;
 import com.ldl.miaosha.domain.MiaoshaUser;
 import com.ldl.miaosha.redis.MiaoshaUserKey;
 import com.ldl.miaosha.service.MiaoshaUserService;
@@ -30,29 +31,6 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
-        HttpServletRequest nativeRequest = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
-        HttpServletResponse nativeResponse = nativeWebRequest.getNativeResponse(HttpServletResponse.class);
-        String parameterToken = nativeRequest.getParameter(MiaoshaUserService.COOKI_NAME_TOKEN);
-        String cookieToken = getCookieValue(nativeRequest, MiaoshaUserService.COOKI_NAME_TOKEN);
-        if (StringUtils.isEmpty(parameterToken) && StringUtils.isEmpty(cookieToken)) {
-            return null;
-        }
-        String token = StringUtils.isEmpty(parameterToken) ? cookieToken : parameterToken;
-        MiaoshaUser miaoshaUser = miaoshaUserService.getByToken(nativeResponse, token);
-        return miaoshaUser;
-    }
-
-    private String getCookieValue(HttpServletRequest httpServletRequest, String cookieName) {
-        Cookie[] cookies = httpServletRequest.getCookies();
-        if (cookies == null || cookies.length <= 0) {
-            return null;
-        }
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(cookieName)) {
-                return cookie.getValue();
-            }
-        }
-
-        return null;
+        return UserContext.getUser();
     }
 }
